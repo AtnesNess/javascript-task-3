@@ -243,7 +243,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
             return '';
         },
-        
+
         _tryShifted: function () {
             var shiftedDate = this._getShiftedDate();
 
@@ -273,24 +273,24 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
              */
         tryLater: function () {
 
-            // if (!this._beginTime) {
-                // this.exists();
-            // }
-            // if (!this._beginTime) {
+            if (!this._beginTime) {
+                this.exists();
+            }
+            if (!this._beginTime) {
 
-            //     return false;
-            // }
-            // var lastShift = this._shift;
-            // for (var shift = lastShift + 30; shift < 336 * 30; shift += 30) {
-            //     this._shift = shift;
-            //     if (this._tryShifted()) {
+                return false;
+            }
+            var lastShift = this._shift;
+            for (var shift = lastShift + 30; shift < 336 * 30; shift += 30) {
+                this._shift = shift;
+                if (this._tryShifted()) {
 
-            //         return true;
-            //     }
-            // }
-            // this._shift = lastShift;
+                    return true;
+                }
+            }
+            this._shift = lastShift;
 
-            // return false;
+            return false;
         }
     };
 };
