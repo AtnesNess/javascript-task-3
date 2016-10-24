@@ -56,6 +56,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             for (var dateIndex = 0; dateIndex < strDates.length; dateIndex++) {
                 var fromDate = this._strDateToDate(strDates[dateIndex].from);
                 var toDate = this._strDateToDate(strDates[dateIndex].to);
+                if (!fromDate || !toDate) {
+                    continue;
+                }
                 if (fromDate > toDate) {
                     dates.push({
                         'from': fromDate,
@@ -157,7 +160,6 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _correctFreeSpace: function (busyInterval) {
-
             for (var spaceIndex = 0; spaceIndex < this._freeSpace.length; spaceIndex += 1) {
                 var interval = this._freeSpace[spaceIndex];
                 var intersection = this._getDatesIntersection([
@@ -187,7 +189,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     this._freeSpace.splice(spaceIndex, 0, beforeInterval);
                 }
                 // console.log(this._freeSpace, "corrected")
-                // console.log(interval, busyInterval);
+                // console.log(interval, busyInterval, spaceIndex);
                 // console.log("\n")
             }
         },
