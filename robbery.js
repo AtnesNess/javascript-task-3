@@ -67,9 +67,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                         // 'to': new Date(this._freeSpace[this._freeSpace.length - 1].to)
                     // });
                     // fromDate = new Date(this._freeSpace[0].from);
-                    var tmp = fromDate;
-                    fromDate = toDate;
-                    toDate = tmp;
+                    continue;
+                    // var tmp = fromDate;
+                    // fromDate = toDate;
+                    // toDate = tmp;
                 }
                 dates.push({
                     'from': fromDate,
