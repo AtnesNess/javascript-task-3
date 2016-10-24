@@ -224,6 +224,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             return result;
         },
 
+
         /**
          * Возвращает отформатированную строку с часами для ограбления
          * Например,
