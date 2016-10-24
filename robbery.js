@@ -18,7 +18,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
     console.info(schedule, duration, workingHours);
 
     return {
-        _bankTimeZone: Number(workingHours.from.match(/.*\+(\d)/)[1]),
+        _bankTimeZone: Number(workingHours.from.match(/.*\+(\d+)/)[1]) % 24,
         _bankFrom: workingHours.from.match(/(\d+):(\d+)\+(\d)/).splice(1, 2),
         _bankTo: workingHours.to.match(/(\d+):(\d+)\+(\d)/).splice(1, 2),
         _duration: duration,
@@ -186,6 +186,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
                     this._freeSpace.splice(spaceIndex, 0, beforeInterval);
                 }
+                // console.log(this._freeSpace, "corrected")
+                // console.log(interval, busyInterval);
+                // console.log("\n")
             }
         },
 
