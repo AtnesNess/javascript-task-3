@@ -27,11 +27,12 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _toBankMins: undefined,
         _beginTime: undefined,
         _shift: 0,
+        _today: new Date(),
         _freeSpace: undefined,
         _robberyTimes: [],
         _weekDays: 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';'),
         _strDateToDate: function (strDate) {
-            var today = new Date();
+            var today = this._today;
             var parsed = strDate.match(/([А-Я]{2})\s(\d{2}):(\d{2})\+(\d)/);
             var weekDay = this._weekDays.indexOf(parsed[1]);
             var hours = Number(parsed[2]);
@@ -42,13 +43,32 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             date.setUTCHours(hours - timeZone);
             date.setUTCDate(today.getDate() - (dayNum - weekDay - 1));
             date.setUTCMinutes(minutes);
-            date.setUTCSeconds(0);
             if (weekDay >= 3) {
 
                 return undefined;
             }
 
             return date;
+        },
+        _fillScheduleForName: function (name) {
+            var strDates = schedule[name];
+            var dates = [];
+            for (var dateIndex = 0; dateIndex < strDates.length; dateIndex++) {
+                var fromDate = this._strDateToDate(strDates[dateIndex].from);
+                var toDate = this._strDateToDate(strDates[dateIndex].to);
+                if (fromDate > toDate) {
+                    dates.push({
+                        'from': fromDate,
+                        'to': new Date(this._freeSpace[this._freeSpace.length - 1].to)
+                    });
+                    fromDate = new Date(this._freeSpace[0].from);
+                }
+                dates.push({
+                    'from': fromDate,
+                    'to': toDate
+                });
+            }
+            this._datedSchedule[name] = dates;
         },
 
         _prepareSchedule: function () {
@@ -59,34 +79,25 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 if (!name) {
                     continue;
                 }
-                var strDates = schedule[name];
-                var dates = [];
-
-                for (var dateIndex = 0; dateIndex < strDates.length; dateIndex++) {
-                    dates.push({
-                        'from': this._strDateToDate(strDates[dateIndex].from),
-                        'to': this._strDateToDate(strDates[dateIndex].to)
-                    });
-                }
-                this._datedSchedule[name] = dates;
+                this._fillScheduleForName(name);
             }
         },
 
         _prepareFreeSpace: function () {
+            this._today.setUTCHours(-this._bankTimeZone);
+            this._today.setUTCMinutes(0);
+            this._today.setUTCSeconds(0);
+            this._today.setUTCMilliseconds(0);
             this._freeSpace = {
-                'from': new Date(),
-                'to': new Date()
+                'from': new Date(this._today),
+                'to': new Date(this._today)
             };
             var from = this._freeSpace.from;
-            from.setUTCDate(from.getDate() - from.getDay() + 1);
-            from.setUTCMinutes(0);
+            from.setUTCDate(from.getUTCDate() - from.getUTCDay() + 1);
             from.setUTCHours(-this._bankTimeZone);
-            from.setUTCSeconds(0);
-            var to = new Date(from);
-            this._freeSpace.to = to;
-            to.setUTCDate(from.getDate() + 6);
-            to.setUTCHours(23 - this._bankTimeZone);
-            to.setUTCMinutes(59);
+            var to = this._freeSpace.to;
+            to.setUTCDate(from.getDate() + 2);
+            to.setUTCHours(24 - this._bankTimeZone);
             this._freeSpace = [this._freeSpace];
 
 
@@ -105,6 +116,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 }
 
                 if (interval.from > intersected.from) {
+
                     intersected.from = interval.from;
                 }
                 if (interval.to < intersected.to) {
@@ -116,12 +128,12 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _isApropForRobery: function (interval) {
+
             var fromFreeMins = (interval.from.getUTCHours() +
                 this._bankTimeZone) % 24 * 60 + interval.from.getUTCMinutes();
             var toFreeMins = (interval.to.getUTCHours() +
                 this._bankTimeZone) % 24 * 60 + interval.to.getUTCMinutes();
             if (fromFreeMins + duration > this._toBankMins) {
-
                 return false;
             }
             if (this._fromBankMins <= fromFreeMins && this._toBankMins >= toFreeMins) {
@@ -136,6 +148,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _correctFreeSpace: function (busyInterval) {
+
             for (var spaceIndex = 0; spaceIndex < this._freeSpace.length; spaceIndex += 1) {
                 var interval = this._freeSpace[spaceIndex];
                 var intersection = this._getDatesIntersection([
@@ -145,12 +158,15 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 if (!intersection) {
                     continue;
                 }
+
                 if (intersection.to < interval.to) {
                     var afterInterval = {
                         'from': intersection.to,
                         'to': interval.to
                     };
+
                     this._freeSpace.splice(spaceIndex + 1, 0, afterInterval);
+
                 }
                 this._freeSpace.splice(spaceIndex, 1);
                 if (interval.from < intersection.from) {
@@ -158,14 +174,42 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                         'from': interval.from,
                         'to': intersection.from
                     };
+
                     this._freeSpace.splice(spaceIndex, 0, beforeInterval);
                 }
             }
         },
 
+        _getNextDate: function (date) {
+            var nextDate = new Date(date);
+            nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+
+            return nextDate;
+        },
+
+        _bankBusyCorrect: function () {
+            var dayBegin = new Date(this._today);
+            dayBegin.setUTCDate(dayBegin.getUTCDate() - dayBegin.getUTCDay() + 1);
+            var bankFrom = new Date(dayBegin);
+            var dayEnd = new Date(dayBegin);
+            var bankTo = new Date(dayBegin);
+            bankFrom.setUTCMinutes(this._fromBankMins);
+            bankTo.setUTCMinutes(this._toBankMins);
+            dayEnd.setUTCHours(24 - this._bankTimeZone);
+            for (var dayIndex = 0; dayIndex < 3; dayIndex++) {
+                this._correctFreeSpace({ 'from': dayBegin, 'to': bankFrom });
+                this._correctFreeSpace({ 'from': bankTo, 'to': dayEnd });
+                bankFrom = this._getNextDate(bankFrom);
+                bankTo = this._getNextDate(bankTo);
+                dayBegin = this._getNextDate(dayBegin);
+                dayEnd = this._getNextDate(dayEnd);
+            }
+        },
+
         _findRoberyTimes: function () {
-            this._prepareSchedule();
             this._prepareFreeSpace();
+            this._prepareSchedule();
+
             var names = Object.keys(this._datedSchedule);
             if (names.length !== 3) {
 
@@ -177,9 +221,12 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     this._correctFreeSpace(this._datedSchedule[name][busyIndex]);
                 }
             }
+            this._bankBusyCorrect();
             this._robberyTimes = [];
+
             for (var i = 0; i < this._freeSpace.length; i++) {
                 var interval = this._freeSpace[i];
+
                 if (this._isApropForRobery(interval)) {
                     this._robberyTimes.push(interval);
                 }
@@ -246,10 +293,8 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
         _tryShifted: function () {
             var shiftedDate = this._getShiftedDate();
-
             for (var i = 0; i < this._robberyTimes.length; i++) {
                 var interval = this._robberyTimes[i];
-
                 if (shiftedDate < interval.from || shiftedDate > interval.to) {
                     continue;
                 }
@@ -272,7 +317,6 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
              * @returns {Boolean}
              */
         tryLater: function () {
-
             if (!this._beginTime) {
                 this.exists();
             }
@@ -280,8 +324,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
                 return false;
             }
+
             var lastShift = this._shift;
-            for (var shift = lastShift + 30; shift < 336 * 30; shift += 30) {
+            for (var shift = lastShift + 30; shift < 144 * 30; shift += 30) {
                 this._shift = shift;
                 if (this._tryShifted()) {
 
