@@ -19,8 +19,8 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
     return {
         _bankTimeZone: Number(workingHours.from.match(/.*\+(\d)/)[1]),
-        _bankFrom: workingHours.from.match(/(\d{2}):(\d{2})\+(\d)/).splice(1, 2),
-        _bankTo: workingHours.to.match(/(\d{2}):(\d{2})\+(\d)/).splice(1, 2),
+        _bankFrom: workingHours.from.match(/(\d+):(\d+)\+(\d)/).splice(1, 2),
+        _bankTo: workingHours.to.match(/(\d+):(\d+)\+(\d)/).splice(1, 2),
         _duration: duration,
         _datedSchedule: {},
         _fromBankMins: undefined,
@@ -33,7 +33,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _weekDays: 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';'),
         _strDateToDate: function (strDate) {
             var today = this._today;
-            var parsed = strDate.match(/([А-Я]{2})\s(\d{2}):(\d{2})\+(\d)/);
+            var parsed = strDate.match(/([А-Я]{2})\s(\d+):(\d+)\+(\d)/);
             var weekDay = this._weekDays.indexOf(parsed[1]);
             var hours = Number(parsed[2]);
             var minutes = Number(parsed[3]);
