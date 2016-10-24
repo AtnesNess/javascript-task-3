@@ -27,7 +27,6 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _toBankMins: undefined,
         _beginTime: undefined,
         _shift: 0,
-
         _freeSpace: {
             'from': new Date(),
             'to': new Date()
