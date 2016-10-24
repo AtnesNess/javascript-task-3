@@ -30,7 +30,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _today: new Date(),
         _freeSpace: undefined,
         _robberyTimes: [],
-        _weekDays: 'ПН;ВТ;СР'.split(';'),
+        _weekDays: 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';'),
         _strDateToDate: function (strDate) {
             var today = this._today;
             var parsed = strDate.match(/([А-Я]{2})\s(\d+):(\d+)\+(\d)/);
@@ -129,12 +129,12 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
         _isApropForRobery: function (interval) {
             // console.log(interval);
-            var index = interval.from.getUTCDay();
-            index += Math.floor((interval.from.getUTCHours() + this._bankTimeZone) / 24);
-            if (index > 3) {
+            // var index = interval.from.getUTCDay();
+            // index += Math.floor((interval.from.getUTCHours() + this._bankTimeZone) / 24);
+            // if (index > 3) {
 
-                return false;
-            }
+            //     return false;
+            // }
 
             var fromFreeMins = (interval.from.getUTCHours() +
                 this._bankTimeZone) % 24 * 60 + interval.from.getUTCMinutes();
@@ -265,7 +265,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _getFormattedDate: function (date, format) {
-            var weekDays = 'ПН;ВТ;СР;'.split(';');
+            var weekDays = 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';');
 
             var index = date.getUTCDay() - 1;
             index += Math.floor((date.getUTCHours() + this._bankTimeZone) / 24);
