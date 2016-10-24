@@ -129,10 +129,17 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
         _isApropForRobery: function (interval) {
 
+            var index = interval.from.getUTCDay();
+            index += Math.floor((interval.from.getUTCHours() + this._bankTimeZone) / 24);
+            if (index > 3) {
+
+                return false;
+            }
             var fromFreeMins = (interval.from.getUTCHours() +
                 this._bankTimeZone) % 24 * 60 + interval.from.getUTCMinutes();
             var toFreeMins = (interval.to.getUTCHours() +
                 this._bankTimeZone) % 24 * 60 + interval.to.getUTCMinutes();
+            // console.log(interval, fromFreeMins, toFreeMins, this._fromBankMins, this._toBankMins)
             if (fromFreeMins + duration > this._toBankMins) {
                 return false;
             }
@@ -140,6 +147,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 var freeDuration = Math.round((interval.to - interval.from) / (1000 * 60));
                 if (freeDuration >= duration) {
 
+                    // console.log("true dur");
                     return true;
                 }
             }
@@ -191,11 +199,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             var dayBegin = new Date(this._today);
             dayBegin.setUTCDate(dayBegin.getUTCDate() - dayBegin.getUTCDay() + 1);
             var bankFrom = new Date(dayBegin);
-            var dayEnd = new Date(dayBegin);
+            var dayEnd = this._getNextDate(dayBegin);
             var bankTo = new Date(dayBegin);
             bankFrom.setUTCMinutes(this._fromBankMins);
             bankTo.setUTCMinutes(this._toBankMins);
-            dayEnd.setUTCHours(24 - this._bankTimeZone);
             for (var dayIndex = 0; dayIndex < 3; dayIndex++) {
                 this._correctFreeSpace({ 'from': dayBegin, 'to': bankFrom });
                 this._correctFreeSpace({ 'from': bankTo, 'to': dayEnd });
@@ -222,6 +229,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             }
 
             this._bankBusyCorrect();
+            // console.log(this._freeSpace);
             this._robberyTimes = [];
             for (var i = 0; i < this._freeSpace.length; i++) {
                 var interval = this._freeSpace[i];
