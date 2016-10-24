@@ -96,7 +96,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             from.setUTCDate(from.getUTCDate() - from.getUTCDay() + 1);
             from.setUTCHours(-this._bankTimeZone);
             var to = this._freeSpace.to;
-            to.setUTCDate(from.getDate() + 2);
+            to.setUTCDate(from.getDate() + 3);
             to.setUTCHours(24 - this._bankTimeZone);
             this._freeSpace = [this._freeSpace];
 
@@ -209,7 +209,6 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _findRoberyTimes: function () {
             this._prepareFreeSpace();
             this._prepareSchedule();
-
             var names = Object.keys(this._datedSchedule);
             if (names.length !== 3) {
 
@@ -221,12 +220,11 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     this._correctFreeSpace(this._datedSchedule[name][busyIndex]);
                 }
             }
+
             this._bankBusyCorrect();
             this._robberyTimes = [];
-
             for (var i = 0; i < this._freeSpace.length; i++) {
                 var interval = this._freeSpace[i];
-
                 if (this._isApropForRobery(interval)) {
                     this._robberyTimes.push(interval);
                 }
