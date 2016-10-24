@@ -27,10 +27,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _toBankMins: undefined,
         _beginTime: undefined,
         _shift: 0,
-        _freeSpace: {
-            'from': new Date(),
-            'to': new Date()
-        },
+        _freeSpace: undefined,
         _robberyTimes: [],
         _weekDays: 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';'),
         _strDateToDate: function (strDate) {
@@ -76,6 +73,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _prepareFreeSpace: function () {
+            this._freeSpace = {
+                'from': new Date(),
+                'to': new Date()
+            };
             var from = this._freeSpace.from;
             from.setUTCDate(from.getDate() - from.getDay() + 1);
             from.setUTCMinutes(0);
@@ -242,6 +243,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
             return '';
         },
+        
         _tryShifted: function () {
             var shiftedDate = this._getShiftedDate();
 
@@ -270,20 +272,25 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
              * @returns {Boolean}
              */
         tryLater: function () {
-            if (!this._beginTime) {
-                this.exists();
-            }
-            var lastShift = this._shift;
-            for (var shift = lastShift + 30; shift < 336 * 30; shift += 30) {
-                this._shift = shift;
-                if (this._tryShifted()) {
 
-                    return true;
-                }
-            }
-            this._shift = lastShift;
+            // if (!this._beginTime) {
+                // this.exists();
+            // }
+            // if (!this._beginTime) {
 
-            return false;
+            //     return false;
+            // }
+            // var lastShift = this._shift;
+            // for (var shift = lastShift + 30; shift < 336 * 30; shift += 30) {
+            //     this._shift = shift;
+            //     if (this._tryShifted()) {
+
+            //         return true;
+            //     }
+            // }
+            // this._shift = lastShift;
+
+            // return false;
         }
     };
 };
