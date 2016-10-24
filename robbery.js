@@ -286,7 +286,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
          * @returns {String}
          */
         format: function (template) {
-            if (this._beginTime) {
+            if (template && this._beginTime && typeof(template) === 'string') {
 
                 var shiftedBegin = this._getShiftedDate();
 
