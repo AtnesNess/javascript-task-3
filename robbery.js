@@ -32,6 +32,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _robberyTimes: [],
         _weekDays: 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';'),
         _strDateToDate: function (strDate) {
+
             var today = this._today;
             var parsed = strDate.match(/([А-Я]{2})\s(\d+):(\d+)\+(\d)/);
             var weekDay = this._weekDays.indexOf(parsed[1]);
@@ -50,6 +51,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
             return date;
         },
+
         _fillScheduleForName: function (name) {
             var strDates = schedule[name];
             var dates = [];
@@ -75,6 +77,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _prepareSchedule: function () {
+
             this._fromBankMins = Number(this._bankFrom[0]) * 60 + Number(this._bankFrom[1]);
             this._toBankMins = Number(this._bankTo[0]) * 60 + Number(this._bankTo[1]);
             this._datedSchedule = {};
@@ -87,6 +90,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _prepareFreeSpace: function () {
+            this._today = new Date();
             this._today.setUTCHours(-this._bankTimeZone);
             this._today.setUTCMinutes(0);
             this._today.setUTCSeconds(0);
@@ -160,12 +164,15 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _correctFreeSpace: function (busyInterval) {
+
+            // console.log(busyInterval)
             for (var spaceIndex = 0; spaceIndex < this._freeSpace.length; spaceIndex += 1) {
                 var interval = this._freeSpace[spaceIndex];
                 var intersection = this._getDatesIntersection([
                     interval,
                     busyInterval
                 ]);
+
                 if (!intersection) {
                     continue;
                 }
@@ -228,8 +235,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
                 return;
             }
+
             for (var nameIndex = 0; nameIndex < names.length; nameIndex++) {
                 var name = names[nameIndex];
+
                 for (var busyIndex = 0; busyIndex < this._datedSchedule[name].length; busyIndex++) {
                     this._correctFreeSpace(this._datedSchedule[name][busyIndex]);
                 }
@@ -253,6 +262,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
          */
         exists: function () {
             this._findRoberyTimes();
+            // console.log(this._freeSpace);
             if (this._robberyTimes.length) {
                 this._beginTime = this._robberyTimes[0];
 
@@ -295,6 +305,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
          * @returns {String}
          */
         format: function (template) {
+            if (!this._beginTime) {
+                this.exists();
+            }
             if (template && this._beginTime && typeof(template) === 'string') {
 
                 var shiftedBegin = this._getShiftedDate();
