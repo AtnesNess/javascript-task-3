@@ -30,7 +30,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _today: new Date(),
         _freeSpace: undefined,
         _robberyTimes: [],
-        _weekDays: 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';'),
+        _weekDays: 'ПН;ВТ;СР'.split(';'),
         _strDateToDate: function (strDate) {
             var today = this._today;
             var parsed = strDate.match(/([А-Я]{2})\s(\d+):(\d+)\+(\d)/);
@@ -128,13 +128,14 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _isApropForRobery: function (interval) {
-
+            // console.log(interval);
             var index = interval.from.getUTCDay();
             index += Math.floor((interval.from.getUTCHours() + this._bankTimeZone) / 24);
             if (index > 3) {
 
                 return false;
             }
+
             var fromFreeMins = (interval.from.getUTCHours() +
                 this._bankTimeZone) % 24 * 60 + interval.from.getUTCMinutes();
             var toFreeMins = (interval.to.getUTCHours() +
@@ -147,10 +148,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 var freeDuration = Math.round((interval.to - interval.from) / (1000 * 60));
                 if (freeDuration >= duration) {
 
-                    // console.log("true dur");
                     return true;
                 }
             }
+            // console.log(this._fromBankMins, fromFreeMins, this._toBankMins, toFreeMins);
 
             return false;
         },
@@ -197,12 +198,13 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
         _bankBusyCorrect: function () {
             var dayBegin = new Date(this._today);
-            dayBegin.setUTCDate(dayBegin.getUTCDate() - dayBegin.getUTCDay() + 1);
+            dayBegin.setUTCDate(dayBegin.getUTCDate() - dayBegin.getUTCDay());
             var bankFrom = new Date(dayBegin);
             var dayEnd = this._getNextDate(dayBegin);
             var bankTo = new Date(dayBegin);
             bankFrom.setUTCMinutes(this._fromBankMins);
             bankTo.setUTCMinutes(this._toBankMins);
+            // console.log(dayBegin, dayEnd, bankFrom, bankTo)
             for (var dayIndex = 0; dayIndex < 3; dayIndex++) {
                 this._correctFreeSpace({ 'from': dayBegin, 'to': bankFrom });
                 this._correctFreeSpace({ 'from': bankTo, 'to': dayEnd });
@@ -227,7 +229,8 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     this._correctFreeSpace(this._datedSchedule[name][busyIndex]);
                 }
             }
-
+            // console.log(this._freeSpace);
+            // console.log("\n");
             this._bankBusyCorrect();
             // console.log(this._freeSpace);
             this._robberyTimes = [];
@@ -262,8 +265,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _getFormattedDate: function (date, format) {
-            var weekDays = 'ВС;ПН;ВТ;СР;ЧТ;ПТ;СБ'.split(';');
-            var index = date.getUTCDay();
+            var weekDays = 'ПН;ВТ;СР;'.split(';');
+
+            var index = date.getUTCDay() - 1;
             index += Math.floor((date.getUTCHours() + this._bankTimeZone) / 24);
 
             var hours = String((date.getUTCHours() + this._bankTimeZone) % 24);
