@@ -334,7 +334,8 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
          * @returns {Boolean}
          */
         exists: function () {
-            if (workingHours.from === workingHours.to) {
+            if (new DateTime('ПН ' + workingHours.from).date() >=
+                new DateTime('ПН ' + workingHours.to).date()) {
 
                 return false;
             }
