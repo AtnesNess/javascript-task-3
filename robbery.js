@@ -62,15 +62,13 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     continue;
                 }
                 if (fromDate > toDate) {
-                    continue;
-                    // dates.push({
-                        // 'from': fromDate,
-                        // 'to': new Date(this._freeSpace[this._freeSpace.length - 1].to)
-                    // });
-                    // toDate.
-                    // var tmp = fromDate;
-                    // fromDate = toDate;
-                    // toDate = tmp;
+                    // continue;
+                    dates.push({
+                        'from': fromDate,
+                        'to': new Date(this._freeSpace[this._freeSpace.length - 1].to)
+                    });
+                    fromDate = new Date(this._freeSpace[0].from);
+
                 }
                 dates.push({
                     'from': fromDate,
