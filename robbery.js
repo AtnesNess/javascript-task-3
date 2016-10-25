@@ -210,8 +210,8 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             };
             for (var i = 1; i < intervals.length; i++) {
                 var interval = intervals[i];
-                if (interval.to.date() < intersected.from.date() ||
-                 interval.from.date() > intersected.to.date()) {
+                if (interval.to.date() <= intersected.from.date() ||
+                 interval.from.date() >= intersected.to.date()) {
 
                     return undefined;
                 }
@@ -392,7 +392,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             for (var i = 0; i < this._robberyTimes.length; i++) {
                 var interval = this._robberyTimes[i];
                 if (shiftedDate.date() < interval.from.date() ||
-                    shiftedDate.date() > interval.to.date()) {
+                    shiftedDate.date() >= interval.to.date()) {
                     continue;
                 }
                 var newInterval = {
