@@ -304,11 +304,6 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             this._prepareFreeSpace();
             this._prepareSchedule();
             var names = Object.keys(this._datedSchedule);
-            if (names.length !== 3) {
-
-                return;
-            }
-
             for (var nameIndex = 0; nameIndex < names.length; nameIndex++) {
                 var name = names[nameIndex];
 
