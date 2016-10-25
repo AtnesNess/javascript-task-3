@@ -161,12 +161,12 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     continue;
                 }
                 if (fromDate.date() > toDate.date()) {
-                    // continue;
-                    dates.push({
-                        'from': fromDate,
-                        'to': new DateTime(this._freeSpace[this._freeSpace.length - 1].to)
-                    });
-                    fromDate = new DateTime(this._freeSpace[0].from);
+                    continue;
+                    // dates.push({
+                    //     'from': fromDate,
+                    //     'to': new DateTime(this._freeSpace[this._freeSpace.length - 1].to)
+                    // });
+                    // fromDate = new DateTime(this._freeSpace[0].from);
                 }
                 dates.push({
                     'from': fromDate,
