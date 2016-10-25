@@ -30,7 +30,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _monday: new Date(),
         _freeSpace: undefined,
         _robberyTimes: [],
-        _weekDays: 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';'),
+        _weekDays: 'ПН;ВТ;СР'.split(';'),
         _strDateToDate: function (strDate) {
 
             var monday = this._monday;
@@ -63,11 +63,14 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 }
                 if (fromDate > toDate) {
                     // continue;
-                    dates.push({
-                        'from': fromDate,
-                        'to': new Date(this._freeSpace[this._freeSpace.length - 1].to)
-                    });
-                    fromDate = new Date(this._freeSpace[0].from);
+                    // dates.push({
+                        // 'from': fromDate,
+                        // 'to': new Date(this._freeSpace[this._freeSpace.length - 1].to)
+                    // });
+                    // fromDate = new Date(this._freeSpace[0].from);
+                    var tmp = new Date(toDate);
+                    toDate = new Date(fromDate);
+                    fromDate = tmp;
 
                 }
                 dates.push({
