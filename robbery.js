@@ -32,7 +32,6 @@ var DateTime = function (time) {
 
 };
 
-
 Object.defineProperties(DateTime.prototype, {
 
     addHours: {
@@ -122,7 +121,6 @@ Object.defineProperties(DateTime.prototype, {
             return this._date;
         }
     }
-
 });
 
 /**
@@ -231,10 +229,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _isApropForRobery: function (interval) {
-            var freeDuration = Math.round((interval.to.date() -
-             interval.from.date()) / (1000 * 60));
+            var freeDuration = (interval.to.date() - interval.from.date());
             // console.log(interval, freeDuration);
-            if (freeDuration >= duration) {
+            if (freeDuration >= duration * 60 * 1000) {
 
                 return true;
             }
@@ -319,7 +316,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     this._correctFreeSpace(this._datedSchedule[name][busyIndex]);
                 }
             }
-            // console.log(this._freeSpace);
+            // console.log(this._freeSpace);/
             // console.log('\n');
             this._bankBusyCorrect();
             // console.log(this._freeSpace);
@@ -358,9 +355,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _getFormattedDate: function (date, format) {
             var hours = date.hours;
             var minutes = date.minutes;
+            var result = format.replace(/%DD/g, date.dayOfWeek());
             hours = ('0' + hours).slice(-2);
             minutes = ('0' + minutes).slice(-2);
-            var result = format.replace(/%DD/g, date.dayOfWeek());
             result = result.replace(/%MM/g, minutes);
             result = result.replace(/%HH/g, hours);
 
@@ -426,7 +423,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             }
 
             var lastShift = this._shift;
-            for (var shift = lastShift + 30; shift < 144 * 30; shift += 30) {
+            for (var shift = lastShift + 30; shift < 30 * 2 * 24 * 3; shift += 30) {
                 this._shift = shift;
                 if (this._tryShifted()) {
 
