@@ -61,16 +61,13 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 if (!fromDate || !toDate) {
                     continue;
                 }
-                if (fromDate > toDate) {
+                if (fromDate >= toDate) {
                     // continue;
-                    // dates.push({
-                        // 'from': fromDate,
-                        // 'to': new Date(this._freeSpace[this._freeSpace.length - 1].to)
-                    // });
-                    // fromDate = new Date(this._freeSpace[0].from);
-                    var tmp = new Date(toDate);
-                    toDate = new Date(fromDate);
-                    fromDate = tmp;
+                    dates.push({
+                        'from': fromDate,
+                        'to': new Date(this._freeSpace[this._freeSpace.length - 1].to)
+                    });
+                    fromDate = new Date(this._freeSpace[0].from);
 
                 }
                 dates.push({
@@ -289,7 +286,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _getFormattedDate: function (date, format) {
-            var weekDays = 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';');
+            var weekDays = 'ПН;ВТ;СР'.split(';');
 
             var index = date.getUTCDay() - 1;
             index += Math.floor((date.getUTCHours() + this._bankTimeZone) / 24);
