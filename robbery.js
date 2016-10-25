@@ -27,23 +27,27 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _toBankMins: undefined,
         _beginTime: undefined,
         _shift: 0,
-        _today: new Date(),
+        _monday: new Date(),
         _freeSpace: undefined,
         _robberyTimes: [],
         _weekDays: 'ПН;ВТ;СР;ЧТ;ПТ;СБ;ВС'.split(';'),
         _strDateToDate: function (strDate) {
 
-            var today = this._today;
+            var monday = this._monday;
+
             var parsed = strDate.match(/([А-Я]{2})\s(\d+):(\d+)\+(\d)/);
             var weekDay = this._weekDays.indexOf(parsed[1]);
             var hours = Number(parsed[2]);
             var minutes = Number(parsed[3]);
             var timeZone = Number(parsed[4]);
-            var dayNum = today.getDay();
-            var date = new Date(today);
+            var date = new Date(monday);
             date.setUTCHours(hours - timeZone);
-            date.setUTCDate(today.getDate() - (dayNum - weekDay - 1));
+            date.setUTCDate(monday.getDate() + weekDay);
             date.setUTCMinutes(minutes);
+            if (weekDay + 1 !==
+                date.getUTCDay() + Math.floor((date.getUTCHours() + this._bankTimeZone) / 24)) {
+                date.setUTCDate(date.getUTCDate() - 1);
+            }
             if (weekDay >= 3) {
 
                 return undefined;
@@ -58,16 +62,17 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             for (var dateIndex = 0; dateIndex < strDates.length; dateIndex++) {
                 var fromDate = this._strDateToDate(strDates[dateIndex].from);
                 var toDate = this._strDateToDate(strDates[dateIndex].to);
+                // console.log(fromDate, toDate);
                 if (!fromDate || !toDate) {
                     continue;
                 }
                 if (fromDate > toDate) {
+                    continue;
                     // dates.push({
                         // 'from': fromDate,
                         // 'to': new Date(this._freeSpace[this._freeSpace.length - 1].to)
                     // });
-                    // fromDate = new Date(this._freeSpace[0].from);
-                    continue;
+                    // toDate.
                     // var tmp = fromDate;
                     // fromDate = toDate;
                     // toDate = tmp;
@@ -77,6 +82,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     'to': toDate
                 });
             }
+
             this._datedSchedule[name] = dates;
         },
 
@@ -91,17 +97,15 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 }
                 this._fillScheduleForName(name);
             }
+
         },
 
         _prepareFreeSpace: function () {
-            this._today = new Date();
-            this._today.setUTCHours(-this._bankTimeZone);
-            this._today.setUTCMinutes(0);
-            this._today.setUTCSeconds(0);
-            this._today.setUTCMilliseconds(0);
+            this._monday = new Date(Date.UTC(2016, 9, 24, 0, 0, 0, 0));
+            this._monday.setUTCHours(-this._bankTimeZone);
             this._freeSpace = {
-                'from': new Date(this._today),
-                'to': new Date(this._today)
+                'from': new Date(this._monday),
+                'to': new Date(this._monday)
             };
             var from = this._freeSpace.from;
             from.setUTCDate(from.getUTCDate() - from.getUTCDay() + 1);
@@ -178,6 +182,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 ]);
 
                 if (!intersection) {
+                    // console.log(this._freeSpace, "failed")
+                    // console.log(interval, busyInterval, spaceIndex);
+                    // console.log("\n")
                     continue;
                 }
 
@@ -213,8 +220,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _bankBusyCorrect: function () {
-            var dayBegin = new Date(this._today);
-            dayBegin.setUTCDate(dayBegin.getUTCDate() - dayBegin.getUTCDay());
+            var dayBegin = new Date(this._monday);
             var bankFrom = new Date(dayBegin);
             var dayEnd = this._getNextDate(dayBegin);
             var bankTo = new Date(dayBegin);
@@ -244,6 +250,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 var name = names[nameIndex];
 
                 for (var busyIndex = 0; busyIndex < this._datedSchedule[name].length; busyIndex++) {
+                    // console.log("corr", this._datedSchedule[name][busyIndex])
                     this._correctFreeSpace(this._datedSchedule[name][busyIndex]);
                 }
             }
