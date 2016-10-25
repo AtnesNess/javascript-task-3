@@ -240,7 +240,6 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         },
 
         _correctFreeSpace: function (busyInterval) {
-
             // console.log(busyInterval)
             for (var spaceIndex = 0; spaceIndex < this._freeSpace.length; spaceIndex += 1) {
                 var interval = this._freeSpace[spaceIndex];
@@ -251,7 +250,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
                 if (!intersection) {
                     // console.log(this._freeSpace, 'failed')
-                    // console.log(interval, busyInterval, spaceIndex);
+                    // console.log(interval, busyInterval, spaceIndex, intersection);
                     // console.log('\n')
                     continue;
                 }
@@ -273,9 +272,11 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     };
 
                     this._freeSpace.splice(spaceIndex, 0, beforeInterval);
+
                 }
+                spaceIndex -= 1;
                 // console.log(this._freeSpace, 'corrected')
-                // console.log(interval, busyInterval, spaceIndex);
+                // console.log(interval, busyInterval, spaceIndex, intersection);
                 // console.log('\n')
             }
         },
