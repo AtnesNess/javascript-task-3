@@ -334,6 +334,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
          * @returns {Boolean}
          */
         exists: function () {
+            if (workingHours.from === workingHours.to) {
+
+                return false;
+            }
             this._findRoberyTimes();
             // console.log(this._freeSpace);
             if (this._robberyTimes.length) {
