@@ -34,20 +34,15 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _strDateToDate: function (strDate) {
 
             var monday = this._monday;
-
-            var parsed = strDate.match(/([А-Я]{2})\s(\d+):(\d+)\+(\d)/);
+            var parsed = strDate.match(/([А-Я]{2})\s(\d+):(\d+)\+(\d+)/);
             var weekDay = this._weekDays.indexOf(parsed[1]);
             var hours = Number(parsed[2]);
             var minutes = Number(parsed[3]);
-            var timeZone = Number(parsed[4]);
+            var timeZone = Number(parsed[4]) % 24;
             var date = new Date(monday);
-            date.setUTCHours(hours - timeZone);
-            date.setUTCDate(monday.getDate() + weekDay);
-            date.setUTCMinutes(minutes);
-            if (weekDay + 1 !==
-                date.getUTCDay() + Math.floor((date.getUTCHours() + this._bankTimeZone) / 24)) {
-                date.setUTCDate(date.getUTCDate() - 1);
-            }
+            date.setUTCHours(date.getUTCHours() + hours - timeZone + this._bankTimeZone);
+            date.setUTCDate(date.getUTCDate() + weekDay);
+            date.setUTCMinutes(date.getUTCMinutes() + minutes);
             if (weekDay >= 3) {
 
                 return undefined;
@@ -84,6 +79,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             }
 
             this._datedSchedule[name] = dates;
+            // console.log(dates)
         },
 
         _prepareSchedule: function () {
@@ -103,6 +99,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _prepareFreeSpace: function () {
             this._monday = new Date(Date.UTC(2016, 9, 24, 0, 0, 0, 0));
             this._monday.setUTCHours(-this._bankTimeZone);
+            // console.log("mnd", this._monday);
             this._freeSpace = {
                 'from': new Date(this._monday),
                 'to': new Date(this._monday)
