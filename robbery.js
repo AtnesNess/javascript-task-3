@@ -103,12 +103,6 @@ Object.defineProperties(DateTime.prototype, {
 
     },
 
-    valueOf: {
-        value: function () {
-            return this.toString() + '+' + this.timezone;
-        }
-    },
-
     date: {
         value: function () {
             return this._date;
@@ -281,14 +275,14 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _findRoberyTimes: function () {
             this._prepareFreeSpace();
             this._prepareSchedule();
+            var context = this;
             var names = Object.keys(this._datedSchedule);
-            for (var nameIndex = 0; nameIndex < names.length; nameIndex++) {
-                var name = names[nameIndex];
-
-                for (var busyIndex = 0; busyIndex < this._datedSchedule[name].length; busyIndex++) {
-                    this._correctFreeSpace(this._datedSchedule[name][busyIndex]);
+            names.forEach(function (name) {
+                for (var busyIndex = 0;
+                    busyIndex < context._datedSchedule[name].length; busyIndex++) {
+                    context._correctFreeSpace(context._datedSchedule[name][busyIndex]);
                 }
-            }
+            });
             this._bankBusyCorrect();
             this._robberyTimes = [];
             for (var i = 0; i < this._freeSpace.length; i++) {
