@@ -17,7 +17,7 @@ var SHIFT = 30;
 var DAYS_NUMBER = 3;
 
 var DateTime = function (time) {
-    if (typeof(time) === 'string') {
+    if (typeof time === 'string') {
         var parsed = time.match(DATE_REGEXP);
         var weekDay = WEEKDAYS.indexOf(parsed[1]);
         var hours = Number(parsed[2]);
@@ -40,21 +40,18 @@ Object.defineProperties(DateTime.prototype, {
 
     addHours: {
         value: function (hours) {
-
             this._date.setUTCHours(this._date.getUTCHours() + hours);
         }
     },
 
     addDays: {
         value: function (days) {
-
             this._date.setUTCDate(this._date.getUTCDate() + days);
         }
     },
 
     addMinutes: {
         value: function (minutes) {
-
             this._date.setUTCMinutes(this._date.getUTCMinutes() + minutes);
         }
     },
@@ -153,12 +150,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     'to': toDate
                 });
             }
-
             this._datedSchedule[name] = dates;
         },
 
         _prepareSchedule: function () {
-
             this._fromBankMins = Number(this._bankFrom[0]) *
              MINS_IN_HOUR + Number(this._bankFrom[1]);
             this._toBankMins = Number(this._bankTo[0]) *
@@ -181,7 +176,6 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             };
             this._freeSpace.to.addDays(3);
             this._freeSpace = [this._freeSpace];
-
         },
 
         _getDatesIntersection: function (intervals) {
@@ -194,11 +188,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 if (interval.to.date() <= intersected.from.date() ||
                  interval.from.date() >= intersected.to.date()) {
 
-                    return undefined;
+                    return;
                 }
 
                 if (interval.from.date() > intersected.from.date()) {
-
                     intersected.from = new DateTime(interval.from);
                 }
                 if (interval.to.date() < intersected.to.date()) {
@@ -275,14 +268,13 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         _findRoberyTimes: function () {
             this._prepareFreeSpace();
             this._prepareSchedule();
-            var context = this;
             var names = Object.keys(this._datedSchedule);
             names.forEach(function (name) {
                 for (var busyIndex = 0;
-                    busyIndex < context._datedSchedule[name].length; busyIndex++) {
-                    context._correctFreeSpace(context._datedSchedule[name][busyIndex]);
+                    busyIndex < this._datedSchedule[name].length; busyIndex++) {
+                    this._correctFreeSpace(this._datedSchedule[name][busyIndex]);
                 }
-            });
+            }.bind(this));
             this._bankBusyCorrect();
             this._robberyTimes = [];
             for (var i = 0; i < this._freeSpace.length; i++) {
@@ -315,20 +307,25 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             return date;
         },
 
+        _twoDigits: function (text) {
+
+            return ('0' + text).slice(-2);
+        },
+
         _getFormattedDate: function (date, format) {
             var hours = date.hours;
             var minutes = date.minutes;
-            var result = format.replace(/%DD/g, date.dayOfWeek());
-            hours = ('0' + hours).slice(-2);
-            minutes = ('0' + minutes).slice(-2);
-            result = result.replace(/%MM/g, minutes);
-            result = result.replace(/%HH/g, hours);
+            hours = this._twoDigits(hours);
+            minutes = this._twoDigits(minutes);
 
-            return result;
+            return format
+                .replace(/%DD/g, date.dayOfWeek())
+                .replace(/%MM/g, minutes)
+                .replace(/%HH/g, hours);
         },
 
 
-        /**
+       /**
          * Возвращает отформатированную строку с часами для ограбления
          * Например,
          *   'Начинаем в %HH:%MM (%DD)' -> 'Начинаем в 14:59 (СР)'
@@ -339,13 +336,11 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             if (!this._beginTime) {
                 this.exists();
             }
-            if (template && this._beginTime && typeof(template) === 'string') {
-
+            if (template && this._beginTime && typeof template === 'string') {
                 var shiftedBegin = this._getShiftedDate();
 
                 return this._getFormattedDate(shiftedBegin, template);
             }
-
 
             return '';
         },
@@ -371,11 +366,11 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             return false;
         },
 
-            /**
-             * Попробовать найти часы для ограбления позже [*]
-             * @star
-             * @returns {Boolean}
-             */
+        /**
+         * Попробовать найти часы для ограбления позже [*]
+         * @star
+         * @returns {Boolean}
+         */
         tryLater: function () {
             if (!this._beginTime) {
                 this.exists();
@@ -387,7 +382,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
             var lastShift = this._shift;
             for (var shift = lastShift + SHIFT; shift < MINS_IN_HOUR *
-                HOURS_IN_DAY * DAYS_NUMBER; shift += 30) {
+                HOURS_IN_DAY * DAYS_NUMBER; shift += SHIFT) {
                 this._shift = shift;
                 if (this._tryShifted()) {
 
